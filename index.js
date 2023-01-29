@@ -32,21 +32,21 @@ async function run() {
       .db(`${process.env.DB_NAME}`)
       .collection("orders");
 
-    app.get("/services", (req, res) => {
-      serviceCollection.find({}).toArray((err, docs) => res.send(docs));
+    app.get("/services", async(req, res) => {
+      await serviceCollection.find({}).toArray((err, docs) => res.send(docs));
     });
 
-    app.get("/reviews", (req, res) => {
+    app.get("/reviews", async(req, res) => {
       if (req.query.email) {
         return reviewCollection
           .find({ email: req.query.email })
-          .toArray((err, docs) => res.send(docs[0]));
+          .toArray((err, docs) => res.send(docs>0));
       }
-      reviewCollection.find({}).toArray((err, docs) => res.send(docs));
+      await reviewCollection.find({}).toArray((err, docs) => res.send(docs));
     });
 
-    app.get("/orders", (req, res) => {
-      adminsCollection.find({ email: req.query.email }).toArray((err, docs) => {
+    app.get("/orders", async(req, res) => {
+      await adminsCollection.find({ email: req.query.email }).toArray((err, docs) => {
         if (docs?.length) {
           orderCollection.find({}).toArray((err, docs) => res.send(docs));
         } else {
@@ -57,40 +57,40 @@ async function run() {
       });
     });
 
-    app.get("/isAdmin", (req, res) => {
-      adminsCollection
+    app.get("/isAdmin", async(req, res) => {
+      await adminsCollection
         .find({ email: req.query.email })
         .toArray((err, docs) => res.send(!!docs?.length));
     });
 
-    app.post("/addService", (req, res) => {
-      serviceCollection
+    app.post("/addService", async(req, res) => {
+      await serviceCollection
         .insertOne(req.body)
         .then((result) => res.send(!!result.insertedCount));
     });
 
-    app.post("/addReview", (req, res) => {
-      reviewCollection
+    app.post("/addReview", async(req, res) => {
+      await reviewCollection
         .insertOne(req.body)
         .then((result) => res.send(!!result.insertedCount));
     });
 
-    app.post("/addAdmin", (req, res) => {
-      adminsCollection
+    app.post("/addAdmin", async(req, res) => {
+      await adminsCollection
         .insertOne(req.body)
         .then((result) => res.send(!!result.insertedCount));
     });
 
-    app.post("/addOrder", (req, res) => {
-      orderCollection
+    app.post("/addOrder", async(req, res) => {
+      await orderCollection
         .insertOne(req.body)
         .then((result) => res.send(!!result.insertedCount));
     });
 
-    app.patch("/updateOrderStatus", (req, res) => {
+    app.patch("/updateOrderStatus", async(req, res) => {
       const { id, status } = req.body;
       console.log(req.body);
-      orderCollection
+      await orderCollection
         .findOneAndUpdate(
           { _id: ObjectId(id) },
           {
@@ -100,8 +100,8 @@ async function run() {
         .then((result) => res.send(result.lastErrorObject.updatedExisting));
     });
 
-    app.patch("/update/:id", (req, res) => {
-      serviceCollection
+    app.patch("/update/:id", async(req, res) => {
+      await serviceCollection
         .updateOne(
           { _id: ObjectId(req.params.id) },
           {
@@ -111,14 +111,14 @@ async function run() {
         .then((result) => res.send(!!result.modifiedCount));
     });
 
-    app.delete("/delete/:id", (req, res) => {
-      serviceCollection
+    app.delete("/delete/:id", async(req, res) => {
+      await serviceCollection
         .deleteOne({ _id: ObjectId(req.params.id) })
         .then((result) => res.send(!!result.deletedCount));
     });
 
-    app.patch("/updateReview/:id", (req, res) => {
-      reviewCollection
+    app.patch("/updateReview/:id", async(req, res) => {
+      await reviewCollection
         .updateOne(
           { _id: ObjectId(req.params.id) },
           {
@@ -128,8 +128,8 @@ async function run() {
         .then((result) => res.send(!!result.modifiedCount));
     });
 
-    app.delete("/deleteReview/:id", (req, res) => {
-      reviewCollection
+    app.delete("/deleteReview/:id", async(req, res) => {
+      await reviewCollection
         .deleteOne({ _id: ObjectId(req.params.id) })
         .then((result) => res.send(!!result.deletedCount));
     });
